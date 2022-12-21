@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		}
+	],
+	"settings": {
+		"explorer.fileNesting.enabled": true,
+		"explorer.fileNesting.expand": true,
+		"explorer.fileNesting.patterns": {
+			"Cargo.toml": "Cargo.lock",
+			"*.ts": "*.d.ts",
+			".env": "*.env"
+		}
+	}
+}

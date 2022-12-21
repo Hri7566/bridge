@@ -1,0 +1,28 @@
+{
+  "name": "bridge",
+  "version": "1.0.0",
+  "main": "build/index.js",
+  "repository": "git@github.com:Hri7566/bridge.git",
+  "author": "Hri7566 <hri7566@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "yarn tsc",
+    "start": "node .",
+    "dev": "yarn build && yarn start"
+  },
+  "devDependencies": {
+    "@types/defaults": "^1.0.3",
+    "@types/node": "^18.11.17",
+    "discord.js": "^14.7.1",
+    "mppclone-client": "^1.0.0",
+    "node-nirc": "^1.0.0",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "defaults": "^1.0.4",
+    "dotenv": "^16.0.3",
+    "pino": "^8.8.0",
+    "redis": "^4.5.1",
+    "yaml": "^2.1.3"
+  }
+}
