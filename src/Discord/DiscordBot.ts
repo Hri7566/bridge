@@ -6,20 +6,18 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { Logger } from '../Logger/Logger';
 
-const { DISCORD_TOKEN } = process.env;
-
 interface Config {
-    uri: string;
+    server: string;
 }
 
 let configFile: string;
 let config: Config;
 let defaultConfig: Config = {
-    uri: 'wss://mppclone.com:8443'
+    server: '1029618816235347999'
 }
 
 try {
-    configFile = readFileSync(resolve(__dirname, '../../', 'config/mpp.yml')).toString();
+    configFile = readFileSync(resolve(__dirname, '../../', 'config/discord.yml')).toString();
     config = defaults(YAML.parse(configFile), defaultConfig);
 } catch (err) {
     throw `Unable to load config file: ` + err;
@@ -41,8 +39,8 @@ export class DiscordBot extends EventEmitter {
         this.bindEventListeners();
     }
 
-    public start(): void {
-        this.client.login(DISCORD_TOKEN);
+    public start(token: string): void {
+        this.client.login(token);
     }
 
     public stop(): void {
@@ -50,8 +48,19 @@ export class DiscordBot extends EventEmitter {
     }
 
     private bindEventListeners(): void {
-        this.client.on(Discord.Events.ClientReady, cl => {
-            
+        this.client.on(Discord.Events.ClientReady, async cl => {
+            console.log('Connected');
+
+            const guilds = await this.client.guilds.fetch();
+            const guild = await (guilds.find(g => g.id == config.server))?.fetch()
+            if (!guild) return;
+
+            const channels = await guild.channels.fetch();
+            // console.log(channels);
         });
+    }
+
+    public createChannel() {
+
     }
 }
