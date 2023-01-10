@@ -1,0 +1,2 @@
+WRN 2023-01-09T16:55:32.573 nvim.6046.0 vim_mktempdir:5214: tempdir create failed: read-only file system: /tmp/nvim.hri7566/XXXXXX
+ERR 2023-01-09T16:55:32.585 nvim.6046.0 vim_mktempdir:5202: tempdir root has invalid permissions (40777): ./nvim.hri7566

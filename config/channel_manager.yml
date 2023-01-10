@@ -1,0 +1,7 @@
+bridges:
+  - channels:
+      - type: mpp
+        id: '✧𝓓𝓔𝓥 𝓡𝓸𝓸𝓶✧'
+        channelSettings:
+          color: '#444444'
+          color2: '#000000'

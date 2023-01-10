@@ -1,30 +1,39 @@
 import { appendFile } from 'fs/promises';
 import { resolve } from 'path';
+import pino from 'pino';
 
-const logger = require('pino')();
-
-const infoFilePath = resolve(__dirname, '../', 'logs/info.log');
-const errorFilePath = resolve(__dirname, '../', 'logs/error.log');
-const warnFilePath = resolve(__dirname, '../', 'logs/warn.log');
-const debugFilePath = resolve(__dirname, '../', 'logs/debug.log');
-const fullFilePath = resolve(__dirname, '../', 'logs/full.log');
+// const infoFilePath = resolve(__dirname, '../', 'logs/info.log');
+// const errorFilePath = resolve(__dirname, '../', 'logs/error.log');
+// const warnFilePath = resolve(__dirname, '../', 'logs/warn.log');
+// const debugFilePath = resolve(__dirname, '../', 'logs/debug.log');
+// const fullFilePath = resolve(__dirname, '../', 'logs/full.log');
 
 export class Logger {
-    constructor(public id: string) { }
+	public logger: pino.Logger;
+	public filePath: string;
 
-    public info(args: any[]): void {
-        logger.info(`[${this.id}]`, ...args);
+    constructor(public id: string, filePath: string) {
+		this.filePath = resolve(__dirname, '../../', 'logs/', filePath + '.log');
+		this.logger = require('pino')({
+			transport: {
+				target: 'pino-pretty'
+			}
+		}, pino.destination(this.filePath));
+	}
+
+    public info(...args: any[]): void {
+        this.logger.info([`[${this.id}]`, ...args].join(' '));
     }
 
-    public error(args: any[]): void {
-        logger.error(`[${this.id}]`, ...args);
+    public error(...args: any[]): void {
+        this.logger.error([`[${this.id}]`, ...args].join(' '));
     }
 
-    public warn(args: any[]): void {
-        logger.warn(`[${this.id}]`, ...args);
+    public warn(...args: any[]): void {
+        this.logger.warn([`[${this.id}]`, ...args].join(' '));
     }
 
-    public debug(args: any[]): void {
-        logger.debug(`[${this.id}]`, ...args);
+    public debug(...args: any[]): void {
+        this.logger.debug([`[${this.id}]`, ...args].join(' '));
     }
 }

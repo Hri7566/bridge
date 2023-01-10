@@ -4,6 +4,7 @@ import { resolve } from 'path';
 import { RedisClientOptions, createClient } from 'redis';
 import YAML from 'yaml';
 import defaults from 'defaults';
+import { Logger } from './Logger/Logger';
 
 export let data: Record<string, any>;
 
@@ -22,6 +23,7 @@ try {
 
 export class Data extends EventEmitter {
     public db = createClient(config);
+	public logger = new Logger('Database', 'db');
 
     constructor() {
         super();
@@ -29,6 +31,8 @@ export class Data extends EventEmitter {
 
     async connect() {
         await this.db.connect();
+		this.logger.info('Connected to Redis');
+		
         const dataHandler: ProxyHandler<Record<string, any>> = {
             set: (target: any, prop: string, value: any) => {
                 target[prop] = value;

@@ -32,7 +32,7 @@ export class DiscordBot extends EventEmitter {
         ]
     });
 
-    public logger = new Logger('Discord');
+    public logger = new Logger('Discord', 'discord');
     
     constructor() {
         super();
@@ -49,7 +49,7 @@ export class DiscordBot extends EventEmitter {
 
     private bindEventListeners(): void {
         this.client.on(Discord.Events.ClientReady, async cl => {
-            console.log('Connected');
+            this.logger.info('Connected');
 
             const guilds = await this.client.guilds.fetch();
             const guild = await (guilds.find(g => g.id == config.server))?.fetch()
@@ -57,6 +57,11 @@ export class DiscordBot extends EventEmitter {
 
             const channels = await guild.channels.fetch();
             // console.log(channels);
+
+			// `/createmppbridge channelName mppRoom`
+			// creates discord channel
+			// get its id
+			// bridge the channel and the room with a default config
         });
     }
 
