@@ -2,6 +2,8 @@ import { resolve } from 'path';
 import { Data, data } from './Data';
 import { DiscordBot } from './Discord/DiscordBot';
 import { config as dotenv } from 'dotenv';
+import { Logger } from './Logger/Logger';
+import { ChannelManager } from './ChannelManager';
 
 dotenv({
     path: resolve(__dirname, '../', '.env')
@@ -9,10 +11,31 @@ dotenv({
 
 const { DISCORD_TOKEN } = process.env;
 
-(async () => {
-    const db = new Data();
-    await db.connect();
+export class Bridgemaster {
+    public static logger = new Logger('Main', 'main');
+    public static discordBot = new DiscordBot();
+    public static db = new Data();
 
-    const discordBot = new DiscordBot();
-    discordBot.start(DISCORD_TOKEN as string);
+    public static async start() {
+        this.logger.info('Starting...');
+        await this.db.connect();
+        this.discordBot.start(DISCORD_TOKEN as string);
+        await ChannelManager.start();
+    }
+
+    public static async stop() {
+        this.logger.info('Stopping...');
+        await ChannelManager.stop();
+        this.discordBot.stop();
+        await this.db.disconnect();
+    }
+}
+
+(async () => {
+    Bridgemaster.start();
 })();
+
+process.on('SIGINT', async () => {
+    // await Bridgemaster.stop();
+    process.exit();
+});

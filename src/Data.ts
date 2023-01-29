@@ -8,10 +8,13 @@ import { Logger } from './Logger/Logger';
 
 export let data: Record<string, any>;
 
+require('dotenv').config();
+
 let configFile: string;
 let config: RedisClientOptions;
 let defaultConfig: RedisClientOptions = {
-    url: 'redis://127.0.0.1'
+    url: 'redis://127.0.0.1',
+    password: process.env.REDIS_PASSWORD
 }
 
 try {
@@ -47,5 +50,20 @@ export class Data extends EventEmitter {
         }
 
         data = new Proxy({}, dataHandler);
+    }
+
+    async disconnect() {
+        await this.db.disconnect();
+        this.logger.info('Disconnected from Redis');
+    }
+
+    async getBridges() {
+        let bridges = await this.db.get('bridges');
+        let out = bridges || '{ "bridges": [] }';
+        return JSON.parse(out);
+    }
+
+    async setBridges(bridges: ChannelManagerConfig) {
+        await this.db.set('bridges', JSON.stringify(bridges));
     }
 }

@@ -3,18 +3,25 @@ import YAML from 'yaml';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import defaults from 'defaults';
+import { Logger } from '../Logger/Logger';
 const Client = require('mppclone-client');
 
-const { MPPCLONE_TOKEN } = process.env;
+require('dotenv').config();
+const MPPCLONE_TOKEN = process.env.MPPCLONE_TOKEN;
 
 interface Config {
     uri: string;
+    user: Userset;
 }
 
 let configFile: string;
 let config: Config;
 let defaultConfig: Config = {
-    uri: 'wss://mppclone.com:8443'
+    uri: 'wss://mppclone.com:8443',
+    user: {
+        name: 'Bridgemaster',
+        color: '#8d3f50'
+    }
 }
 
 try {
@@ -27,6 +34,11 @@ try {
 export interface Participant {
     id: string;
     _id: string;
+    name: string;
+    color: `#${string}`;
+}
+
+export interface Userset {
     name: string;
     color: `#${string}`;
 }
@@ -46,12 +58,16 @@ export interface MPPOutgoingMessage {
 }
 
 export class MPPBot extends Client {
-    constructor() {
+    logger: Logger;
+
+    constructor(public bridgeChannel: string) {
         super(config.uri, MPPCLONE_TOKEN);
+        this.logger = new Logger('MPP - ' + bridgeChannel, 'mpp.' + bridgeChannel.split('/').join('-'));
     }
 
     public start() {
         super.start();
+        super.setChannel(this.bridgeChannel);
     }
 
     public stop() {
@@ -60,7 +76,7 @@ export class MPPBot extends Client {
 
     public sendChat(str: string) {
         for (const line of str.split('\n')) {
-            this.sendArray([{
+            super.sendArray([{
                 m: 'a',
                 message: line
             }]);
@@ -70,12 +86,12 @@ export class MPPBot extends Client {
     public bindEventListeners() {
         super.bindEventListeners();
 
-        this.on('a', (msg: any) => {
-
+        super.on('t', (msg: any) => {
+            super.sendArray([{ m: 'userset', set: config.user }]);
+            if (this.bridgeChannel !== this.channel.id) {
+                super.setChannel(this.bridgeChannel);
+                return;
+            }
         });
     }
-}
-
-export class MPPBotHandler extends EventEmitter {
-
 }

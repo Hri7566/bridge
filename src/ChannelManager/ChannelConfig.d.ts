@@ -11,15 +11,15 @@ declare interface ChannelConfigMPP {
 	channelSettings: ChannelSettings;
 }
 
-declare type ChannelConfig = ChannelConfigDiscord | ChannelConfigIRC | ChannelConfigMPP | {
+declare type ChannelConfig = (ChannelConfigDiscord | ChannelConfigIRC | ChannelConfigMPP) & {
 	type: string;
 	id: string; // mpp room name/discord channel id/irc channel name
 }
 
-declare interface Bridge {
+declare interface BridgeConfig {
 	channels: ChannelConfig[];
 }
 
 declare interface ChannelManagerConfig {
-	bridges: Bridge[];
+	bridges: BridgeConfig[];
 }
