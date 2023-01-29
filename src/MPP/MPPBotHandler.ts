@@ -88,6 +88,7 @@ export class MPPBot extends Client {
 
         super.on('t', (msg: any) => {
             super.sendArray([{ m: 'userset', set: config.user }]);
+            if (!this.channel) return;
             if (this.bridgeChannel !== this.channel.id) {
                 super.setChannel(this.bridgeChannel);
                 return;
