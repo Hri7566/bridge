@@ -119,9 +119,11 @@ export class ChannelManager {
 				});
 
 				bot.on('participant added', (p: any) => {
-					if (channelConfig.id !== bot.channel._id) {
-						bot.setChannel(channelConfig.id);
-						return;
+					if (bot.channel) {
+						if (channelConfig.id !== bot.channel._id) {
+							bot.setChannel(channelConfig.id);
+							return;
+						}
 					}
 
 					bridge.eventStream.emit(
@@ -132,9 +134,11 @@ export class ChannelManager {
 				});
 
 				bot.on('participant removed', (p: any) => {
-					if (channelConfig.id !== bot.channel._id) {
-						bot.setChannel(channelConfig.id);
-						return;
+					if (bot.channel) {
+						if (channelConfig.id !== bot.channel._id) {
+							bot.setChannel(channelConfig.id);
+							return;
+						}
 					}
 
 					bridge.eventStream.emit(
