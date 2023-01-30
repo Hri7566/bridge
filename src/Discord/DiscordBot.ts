@@ -50,6 +50,8 @@ export class DiscordBot extends EventEmitter {
         super();
         this.registerSlashCommands();
         this.bindEventListeners();
+
+        this.client.setMaxListeners(10000);
     }
 
     public start(token: string): void {
