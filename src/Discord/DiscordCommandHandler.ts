@@ -234,12 +234,12 @@ DiscordCommandHandler.registerCommand(new DiscordCommand(
             if (p.id == int.channel.id) {
                 b.posts.forEach(p => p.id == 'mpp' ? (p as MPPBridgePost).bot.stop() : undefined);
                 ChannelManager.bridges.splice(ChannelManager.bridges.indexOf(b), 1);
-            }
 
-            b.posts.forEach(p => {
-                if (p.type !== 'mpp') return;
-                (p as MPPBridgePost).bot.stop();
-            });
+                // b.posts.forEach(p => {
+                //     if (p.type !== 'mpp') return;
+                //     (p as MPPBridgePost).bot.stop();
+                // });
+            }
         }
 
         bridgeConfigLoop:
