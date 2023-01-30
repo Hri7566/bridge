@@ -60,28 +60,28 @@ export class ChannelManager {
 		for (let channelConfig of bridgeConfig.channels) {
 			// each channel has its own connection rules based on ch.type
 			if (channelConfig.type == 'discord') {
-			let guild = await Bridgemaster.discordBot.client.guilds.fetch(Bridgemaster.discordBot.config.server);
-			if (!guild) {
-				this.logger.info('Unable to bridge Discord channel: Guild not found');
-				continue;
-			}
-			
-			const channel = await guild.channels.fetch(channelConfig.id);
-			if (!channel) {
-				this.logger.info('Unable to bridge Discord channel: Channel not found');
-				continue;
-			}
+				let guild = await Bridgemaster.discordBot.client.guilds.fetch(Bridgemaster.discordBot.config.server);
+				if (!guild) {
+					this.logger.info('Unable to bridge Discord channel: Guild not found');
+					continue;
+				}
 
-			const discordPost = new DiscordBridgePost(Bridgemaster.discordBot, channel);
+				const channel = await guild.channels.fetch(channelConfig.id);
+				if (!channel) {
+					this.logger.info('Unable to bridge Discord channel: Channel not found');
+					continue;
+				}
+
+				const discordPost = new DiscordBridgePost(Bridgemaster.discordBot, channel);
 			
-			Bridgemaster.discordBot.client.on(Discord.Events.MessageCreate, msg => {
-				if (msg.author.id == Bridgemaster.discordBot.config.client) return;
-				if (msg.channel.id !== channelConfig.id) return;
-				
-				bridge.eventStream.emit(
-					'message',
-					discordPost,
-					`[Discord] \`${msg.author.id.substring(0, 6)}\` ${msg.author.username}: ${msg.content}`
+				Bridgemaster.discordBot.client.on(Discord.Events.MessageCreate, msg => {
+					if (msg.author.id == Bridgemaster.discordBot.config.client) return;
+					if (msg.channel.id !== channelConfig.id) return;
+
+					bridge.eventStream.emit(
+						'message',
+						discordPost,
+						`[Discord] \`${msg.author.id.substring(0, 6)}\` ${msg.author.username}: ${msg.content}`
 					);
 				});
 
@@ -110,6 +110,32 @@ export class ChannelManager {
 						'message',
 						mppPost,
 						`[MPP] \`${msg.p._id.substring(0, 6)}\` ${msg.p.name}: ${msg.a}`
+					);
+				});
+
+				bot.on('participant added', (p: any) => {
+					if (channelConfig.id !== bot.channel._id) {
+						bot.setChannel(channelConfig.id);
+						return;
+					}
+
+					bridge.eventStream.emit(
+						'message',
+						mppPost,
+						`[MPP] \`${p._id.substring(0, 6)}\` ${p.name} joined the room`
+					);
+				});
+
+				bot.on('participant removed', (p: any) => {
+					if (channelConfig.id !== bot.channel._id) {
+						bot.setChannel(channelConfig.id);
+						return;
+					}
+
+					bridge.eventStream.emit(
+						'message',
+						mppPost,
+						`[MPP] \`${p._id.substring(0, 6)}\` ${p.name} left the room`
 					);
 				});
 
