@@ -34,8 +34,3 @@ export class Bridgemaster {
 (async () => {
     Bridgemaster.start();
 })();
-
-process.on('SIGINT', async () => {
-    // await Bridgemaster.stop();
-    process.exit();
-});
