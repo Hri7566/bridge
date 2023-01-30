@@ -91,7 +91,7 @@ export class ChannelManager {
 					channel.send({
 						content: message,
 						allowedMentions: {
-							pase: []
+							parse: []
 						}
 					});
 				});
