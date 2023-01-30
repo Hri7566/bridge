@@ -88,7 +88,12 @@ export class ChannelManager {
 				bridge.eventStream.on('message', (post, message) => {
 					if (!channel.isTextBased()) return;
 					if (post.type == 'discord') return;
-					channel.send(message);
+					channel.send({
+						content: message,
+						allowedMentions: {
+							pase: []
+						}
+					});
 				});
 
 				bridge.addPost(discordPost);
