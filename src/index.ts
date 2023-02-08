@@ -4,6 +4,7 @@ import { DiscordBot } from './Discord/DiscordBot';
 import { config as dotenv } from 'dotenv';
 import { Logger } from './Logger/Logger';
 import { ChannelManager } from './ChannelManager';
+import * as yargs from 'yargs';
 
 dotenv({
     path: resolve(__dirname, '../', '.env')
