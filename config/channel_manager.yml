@@ -1,9 +1,11 @@
 bridges:
-  - channels:
-      - type: 'mpp'
-        id: '✧𝓓𝓔𝓥 𝓡𝓸𝓸𝓶✧'
-        channelSettings:
-          color: '#222222'
-          color2: '#000000'
-      - type: 'discord'
-        id: '1069218861020360775'
+    - channels:
+          - type: "mpp"
+            id: "✧𝓓𝓔𝓥 𝓡𝓸𝓸𝓶✧"
+            channelSettings:
+                color: "#222222"
+                color2: "#000000"
+          - type: "discord"
+            id: "1069218861020360775"
+          - type: "irc"
+            id: "mpp"
