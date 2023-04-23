@@ -403,10 +403,10 @@ mppclone-client@^1.0.0:
   dependencies:
     ws "^8.5.0"
 
-node-nirc@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/node-nirc/-/node-nirc-1.0.0.tgz#46909f8d96ab18c22d80b3f343a319a2526b6e2d"
-  integrity sha512-jQuPbZUKKrdra8VKpe/9sQAd+kB89hUw2SpA74rx07q8p7ehUTEamD5XI0L3Cr42U8LdqVko1/pH8WsCyKc+iQ==
+node-nirc@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/node-nirc/-/node-nirc-1.1.0.tgz#9c16d1512bf4c3fd284d7f5954760ae43966c73f"
+  integrity sha512-jP+H2JUsAvSJA+LYr1gePZcrxWx9lScYlt9CJrWF3bE0svPCFEL1L8quxDzx33qm0tZK42ETFrea9i0/kQ526Q==
 
 on-exit-leak-free@^2.1.0:
   version "2.1.0"
