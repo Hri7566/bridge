@@ -1,69 +1,31 @@
-import EventEmitter from 'events';
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
-import { RedisClientOptions, createClient } from 'redis';
-import YAML from 'yaml';
-import defaults from 'defaults';
-import { Logger } from './Logger/Logger';
+import { Level } from "level";
+import { Logger } from "./util/Logger";
 
-export let data: Record<string, any>;
+const dbPath = process.env.DB_PATH || "./data";
 
-require('dotenv').config();
-
-let configFile: string;
-let config: RedisClientOptions;
-let defaultConfig: RedisClientOptions = {
-    url: 'redis://127.0.0.1',
-    password: process.env.REDIS_PASSWORD
+enum DBKeys {
+    Token = "token",
 }
 
-try {
-    configFile = readFileSync(resolve(__dirname, '../', 'config/redis.yml')).toString();
-    config = defaults(YAML.parse(configFile), defaultConfig);
-} catch (err) {
-    throw `Unable to load config file: ` + err;
-}
+export class Data {
+    public static logger = new Logger("Database");
 
-export class Data extends EventEmitter {
-    public db = createClient(config);
-	public logger = new Logger('Database', 'db');
+    public static db = new Level(dbPath, {
+        valueEncoding: "json"
+    });
 
-    constructor() {
-        super();
+    public static async createToken() {
+        const token = crypto.randomUUID();
+        await this.db.put(`${DBKeys.Token}.${token}`, true as unknown as string);
+        return token;
     }
 
-    async connect() {
-        await this.db.connect();
-		this.logger.info('Connected to Redis');
-		
-        const dataHandler: ProxyHandler<Record<string, any>> = {
-            set: (target: any, prop: string, value: any) => {
-                target[prop] = value;
-                this.db.set(prop, value);
-                return true;
-            },
-            get: async (target: Record<string, any>, prop: string, receiver: any) => {
-                let value = await this.db.get(prop);
-                target[prop] = value;
-                return value;
-            }
-        }
-
-        data = new Proxy({}, dataHandler);
+    public static async deleteToken(token: string) {
+        await this.db.del(`${DBKeys.Token}.${token}`);
     }
 
-    async disconnect() {
-        await this.db.disconnect();
-        this.logger.info('Disconnected from Redis');
-    }
-
-    async getBridges() {
-        let bridges = await this.db.get('bridges');
-        let out = bridges || '{ "bridges": [] }';
-        return JSON.parse(out);
-    }
-
-    async setBridges(bridges: ChannelManagerConfig) {
-        await this.db.set('bridges', JSON.stringify(bridges));
+    public static async isTokenValid(token: string) {
+        const data = await this.db.get(`${DBKeys.Token}.${token}`) as unknown as boolean;
+        return data === true;
     }
 }

@@ -1,37 +1,100 @@
-import { resolve } from "path";
-import { Data, data } from "./Data";
-import { DiscordBot } from "./Discord/DiscordBot";
-import { config as dotenv } from "dotenv";
-import { Logger } from "./Logger/Logger";
-import { ChannelManager } from "./ChannelManager";
-import * as yargs from "yargs";
+import { Data } from "./Data";
+import { ServiceStatus } from "./services/Service";
+import { ServiceSocket } from "./services/ServiceSocket";
+import { startReadline } from "./util/cli";
+import { ConfigManager } from "./util/config";
+import { Logger } from "./util/Logger";
 
-dotenv({
-    path: resolve(__dirname, "../", ".env")
-});
+startReadline();
+const logger = new Logger("Bridge Server");
 
-const { DISCORD_TOKEN } = process.env;
+const defaultConfig = {
+    host: "127.0.0.1",
+    port: 7566,
+    allowedMessageTypes: ["auth", "chat"]
+};
 
-export class Bridgemaster {
-    public static logger = new Logger("Main", "main");
-    public static discordBot = new DiscordBot();
-    public static db = new Data();
+const config = ConfigManager.loadConfig("./config/server.yml", defaultConfig);
 
-    public static async start() {
-        this.logger.info("Starting...");
-        await this.db.connect();
-        this.discordBot.start(DISCORD_TOKEN as string);
-        await ChannelManager.start();
-    }
-
-    public static async stop() {
-        this.logger.info("Stopping...");
-        await ChannelManager.stop();
-        this.discordBot.stop();
-        await this.db.disconnect();
-    }
+export interface WebSocketData {
+    sid: number; // session id
 }
 
-(async () => {
-    Bridgemaster.start();
-})();
+let _s = 0;
+
+function getNextSessionId() {
+    return ++_s;
+}
+
+const services = new Map<number, ServiceSocket>();
+
+const globalEvents = ["chat"];
+
+const server = Bun.serve({
+    hostname: config.host,
+    port: config.port,
+    fetch(req, server) {
+        if (!server.upgrade(req, {
+            data: {
+                sid: getNextSessionId()
+            }
+        })) {
+            --_s;
+            return new Response("upgrade required");
+        }
+    },
+    websocket: {
+        data: {} as WebSocketData,
+        open(ws) {
+            logger.debug("Socket connected: " + ws.data.sid);
+            services.set(ws.data.sid, new ServiceSocket(ws));
+        },
+        close(ws, code, reason) {
+            logger.debug("Socket disconnected: " + ws.data.sid, code, reason);
+            const s = services.get(ws.data.sid);
+
+            if (s) {
+                s.destroy();
+                services.delete(ws.data.sid);
+            }
+        },
+        message(ws, message) {
+            try {
+                const s = services.get(ws.data.sid);
+                if (!s) return;
+
+                const data = JSON.parse(message);
+                if (typeof data.type !== "string") return;
+                if (s.status !== ServiceStatus.AFU && data.type !== "connect") return;
+                s.emit(data.type, data);
+
+                if (globalEvents.indexOf(data.type) === -1) return;
+
+                data.user = ws.data;
+                data.origin = s.getOrigin();
+
+                logger.debug(data);
+
+                for (const se of services.values()) {
+                    if (se === s) continue;
+                    if (se.status !== ServiceStatus.AFU) continue;
+                    se.transmit(data);
+                }
+            } catch (err) {
+                logger.error(err);
+            }
+        }
+    },
+    error(err) {
+        logger.error(err);
+    }
+});
+
+logger.info(`Server listening on ${server.hostname}:${server.port}`);
+
+process.on("SIGINT", async () => {
+    logger.info("Received SIGINT");
+    logger.info("Shutting down...");
+    await server.stop();
+    process.exit();
+});

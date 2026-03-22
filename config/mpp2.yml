@@ -1,9 +1,9 @@
 uri: ws://127.0.0.1:7566
-channel: cheez
+mppUri: wss://backend.multiplayerpiano.net
+channel: cheez2
 user:
     name: Bridgemaster
     color: "#00ff99"
-envToken: MPPNET_SERVICE_TOKEN
-mppUri: wss://backend.multiplayerpiano.net
+envToken: MPPNET_SERVICE_TOKEN_2
 mppServerId: mppnet
 envMPPToken: MPPNET_TOKEN
